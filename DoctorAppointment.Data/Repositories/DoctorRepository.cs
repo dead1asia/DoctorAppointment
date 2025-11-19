@@ -1,6 +1,9 @@
-﻿using MyDoctorAppointment.Data.Configuration;
+﻿using DoctorAppointment.Data.Configuration;
+using MyDoctorAppointment.Data.Configuration;
 using MyDoctorAppointment.Data.Interfaces;
 using MyDoctorAppointment.Domain.Entities;
+using Newtonsoft.Json;
+using System.Text;
 
 namespace MyDoctorAppointment.Data.Repositories
 {
@@ -12,23 +15,36 @@ namespace MyDoctorAppointment.Data.Repositories
 
         public DoctorRepository()
         {
-            dynamic result = ReadFromAppSettings();
+            AppSettings settings = ReadFromAppSettings();
 
-            Path = result.Database.Doctors.Path;
-            LastId = result.Database.Doctors.LastId;
+            Path = settings.DataBase.Doctors.Path;
+            LastId = settings.DataBase.Doctors.LastId;
         }
 
         public override void ShowInfo(Doctor doctor)
         {
-            Console.WriteLine(); // implement view of all object fields
+            var sb = new StringBuilder();
+
+            sb.AppendLine("===========================================");
+            sb.AppendLine($" Doctor Information (ID: {doctor.Id})");
+            sb.AppendLine("===========================================");
+            sb.AppendLine($"Name:           {doctor.Name} {doctor.Surname}");
+            sb.AppendLine($"Specialization: {doctor.DoctorType}");
+            sb.AppendLine($"Experience (years): {doctor.Experience}");
+            sb.AppendLine($"Salary:         {doctor.Salary} $");
+            sb.AppendLine("--- Contacts ---");
+            sb.AppendLine($"Phone:          {doctor.Phone ?? "Not specified"}");
+            sb.AppendLine($"Email:          {doctor.Email ?? "Not specified"}");
+            sb.AppendLine("===========================================");
+            Console.WriteLine(sb);
         }
 
         protected override void SaveLastId()
         {
-            dynamic result = ReadFromAppSettings();
-            result.Database.Doctors.LastId = LastId;
-
-            File.WriteAllText(Constants.AppSettingsPath, result.ToString());
+            AppSettings settings = ReadFromAppSettings();
+            settings.DataBase.Doctors.LastId = LastId;
+            string updatedSettings = JsonConvert.SerializeObject(settings, Formatting.Indented);
+            File.WriteAllText(Constants.AppSettingsPath, updatedSettings);
         }
     }
 }

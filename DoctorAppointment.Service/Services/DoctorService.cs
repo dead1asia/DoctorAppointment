@@ -5,38 +5,42 @@ using MyDoctorAppointment.Service.Interfaces;
 
 namespace MyDoctorAppointment.Service.Services
 {
-    public class DoctorService : IDoctorService
+    public class DoctorService : IService<Doctor> 
     {
-        private readonly IDoctorRepository _doctorRepository;
+        private readonly IDoctorRepository doctorRepository;
 
         public DoctorService()
         {
-            _doctorRepository = new DoctorRepository();
+            doctorRepository = new DoctorRepository();
         }
 
         public Doctor Create(Doctor doctor)
         {
-            return _doctorRepository.Create(doctor);
+            return doctorRepository.Create(doctor);
         }
 
         public bool Delete(int id)
         {
-            return _doctorRepository.Delete(id);
+            return doctorRepository.Delete(id);
         }
 
         public Doctor? Get(int id)
         {
-            return _doctorRepository.GetById(id);
+            return doctorRepository.GetById(id);
         }
 
         public IEnumerable<Doctor> GetAll()
         {
-            return _doctorRepository.GetAll();
+            return doctorRepository.GetAll();
         }
 
         public Doctor Update(int id, Doctor doctor)
         {
-            return _doctorRepository.Update(id, doctor);
+            return doctorRepository.Update(id, doctor);
+        }
+        public void ShowInfo(Doctor doctor)
+        {
+            doctorRepository.ShowInfo(doctor);
         }
     }
 }
