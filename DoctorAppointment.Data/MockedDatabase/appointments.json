@@ -1,0 +1,34 @@
+[
+  {
+    "Patient": {
+      "IllnessType": 0,
+      "AdditionalInfo": null,
+      "Address": null,
+      "Name": "Karl",
+      "Surname": "Bexler",
+      "Phone": null,
+      "Email": null,
+      "Id": 0,
+      "CreatedAt": "0001-01-01T00:00:00",
+      "UpdatedAt": "0001-01-01T00:00:00"
+    },
+    "Doctor": {
+      "DoctorType": 0,
+      "Experience": 0,
+      "Salary": 0.0,
+      "Name": "Henry",
+      "Surname": "Korven",
+      "Phone": null,
+      "Email": null,
+      "Id": 0,
+      "CreatedAt": "0001-01-01T00:00:00",
+      "UpdatedAt": "0001-01-01T00:00:00"
+    },
+    "DateTimeFrom": "2026-01-15T14:00:00",
+    "DateTimeTo": "2026-01-15T14:45:00",
+    "Description": "Routine check-up and follow-up consultation regarding migraines.",
+    "Id": 1,
+    "CreatedAt": "2025-11-19T23:02:40.3974863+02:00",
+    "UpdatedAt": "0001-01-01T00:00:00"
+  }
+]
