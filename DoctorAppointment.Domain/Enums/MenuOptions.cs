@@ -14,6 +14,6 @@ namespace DoctorAppointment.Domain.Enums
         ShowDoctors,
         ShowPatients,
         ShowAppointments,
-        Exit
+        Exit,
     }
 }

@@ -1,46 +1,49 @@
-﻿using MyDoctorAppointment.Data.Interfaces;
+﻿using DoctorAppointment.Data.Interfaces;
+using DoctorAppointment.Domain.Enums;
+using DoctorAppointment.Service.Interfaces;
+using MyDoctorAppointment.Data.Interfaces;
 using MyDoctorAppointment.Data.Repositories;
 using MyDoctorAppointment.Domain.Entities;
 using MyDoctorAppointment.Service.Interfaces;
 
 namespace MyDoctorAppointment.Service.Services
 {
-    public class DoctorService : IService<Doctor> 
+    public class DoctorService : IDoctorService
     {
-        private readonly IDoctorRepository doctorRepository;
+        private readonly IDoctorRepository _doctorRepository;
 
-        public DoctorService()
+        public DoctorService(ISerializer serializer, FileExtension extension)
         {
-            doctorRepository = new DoctorRepository();
+            _doctorRepository = new DoctorRepository(serializer, extension);
         }
 
         public Doctor Create(Doctor doctor)
         {
-            return doctorRepository.Create(doctor);
+            return _doctorRepository.Create(doctor);
         }
 
         public bool Delete(int id)
         {
-            return doctorRepository.Delete(id);
+            return _doctorRepository.Delete(id);
         }
 
         public Doctor? Get(int id)
         {
-            return doctorRepository.GetById(id);
+            return _doctorRepository.GetById(id);
         }
 
         public IEnumerable<Doctor> GetAll()
         {
-            return doctorRepository.GetAll();
+            return _doctorRepository.GetAll();
         }
 
         public Doctor Update(int id, Doctor doctor)
         {
-            return doctorRepository.Update(id, doctor);
+            return _doctorRepository.Update(id, doctor);
         }
         public void ShowInfo(Doctor doctor)
         {
-            doctorRepository.ShowInfo(doctor);
+            _doctorRepository.ShowInfo(doctor);
         }
     }
 }

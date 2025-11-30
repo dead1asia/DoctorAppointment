@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="dead1asia.DataGenerator" Version="0.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\DoctorAppointment.Data\DoctorAppointment.Data.csproj" />
     <ProjectReference Include="..\DoctorAppointment.Domain\DoctorAppointment.Domain.csproj" />
   </ItemGroup>

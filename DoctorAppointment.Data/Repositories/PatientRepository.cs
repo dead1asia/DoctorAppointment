@@ -1,6 +1,6 @@
 ﻿using DoctorAppointment.Data.Configuration;
 using DoctorAppointment.Data.Interfaces;
-using MyDoctorAppointment.Data.Configuration;
+using DoctorAppointment.Domain.Enums;
 using MyDoctorAppointment.Data.Repositories;
 using MyDoctorAppointment.Domain.Entities;
 using Newtonsoft.Json;
@@ -17,11 +17,13 @@ namespace DoctorAppointment.Data.Repositories
     {
         public override string Path { get; set; }
         public override int LastId { get; set; }
-        public PatientRepository()
+        private readonly FileExtension _extension;
+        public PatientRepository(ISerializer serializer, FileExtension extension)
+            : base(serializer)
         {
-            AppSettings settings = ReadFromAppSettings();
-            Path = settings.DataBase.Patients.Path;
-            LastId = settings.DataBase.Patients.LastId;
+            Path = Constants.GetPath(SaveLocation.Patients, extension);
+            LastId = LastIdManager.Load(extension).PatientsLastId;
+            _extension = extension;
         }
 
         public override void ShowInfo(Patient patient)
@@ -44,10 +46,9 @@ namespace DoctorAppointment.Data.Repositories
         }
         protected override void SaveLastId()
         {
-            AppSettings settings = ReadFromAppSettings();
-            settings.DataBase.Patients.LastId = LastId;
-            string updatedSettings = JsonConvert.SerializeObject(settings, Formatting.Indented);
-            File.WriteAllText(Constants.AppSettingsPath, updatedSettings);
+            LastIdData data = LastIdManager.Load(_extension);
+            data.PatientsLastId = LastId;
+            LastIdManager.Save(data, _extension);
         }
     }
 }

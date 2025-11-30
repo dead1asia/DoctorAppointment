@@ -1,5 +1,7 @@
 ﻿using DoctorAppointment.Data.Interfaces;
 using DoctorAppointment.Data.Repositories;
+using DoctorAppointment.Domain.Enums;
+using DoctorAppointment.Service.Interfaces;
 using MyDoctorAppointment.Data.Interfaces;
 using MyDoctorAppointment.Data.Repositories;
 using MyDoctorAppointment.Domain.Entities;
@@ -12,42 +14,42 @@ using System.Threading.Tasks;
 
 namespace DoctorAppointment.Service.Services
 {
-    public class AppointmentService : IService<Appointment>
+    public class AppointmentService : IAppointmentService
     {
-        private readonly IAppointmentRepository appointmentRepository;
+        private readonly IAppointmentRepository _appointmentRepository;
 
-        public AppointmentService()
+        public AppointmentService(ISerializer serializer, FileExtension extension)
         {
-            appointmentRepository = new AppointmentRepository();
+            _appointmentRepository = new AppointmentRepository(serializer, extension);
         }
 
         public Appointment Create(Appointment appointment)
         {
-            return appointmentRepository.Create(appointment);
+            return _appointmentRepository.Create(appointment);
         }
 
         public bool Delete(int id)
         {
-            return appointmentRepository.Delete(id);
+            return _appointmentRepository.Delete(id);
         }
 
         public Appointment? Get(int id)
         {
-            return appointmentRepository.GetById(id);
+            return _appointmentRepository.GetById(id);
         }
 
         public IEnumerable<Appointment> GetAll()
         {
-            return appointmentRepository.GetAll();
+            return _appointmentRepository.GetAll();
         }
 
         public Appointment Update(int id, Appointment appointment)
         {
-            return appointmentRepository.Update(id, appointment);
+            return _appointmentRepository.Update(id, appointment);
         }
-        public void ShowInfo(Appointment appointment)
+        public void ShowInfo(Appointment appointment, Doctor doctor, Patient patient)
         {
-            appointmentRepository.ShowInfo(appointment);
+            _appointmentRepository.ShowInfo(appointment, doctor, patient);
         }
     }
 }

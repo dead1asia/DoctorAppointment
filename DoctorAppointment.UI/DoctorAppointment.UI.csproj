@@ -8,6 +8,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <PackageReference Include="dead1asia.DataGenerator" Version="0.0.1" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<ProjectReference Include="..\DoctorAppointment.Service\DoctorAppointment.Service.csproj" />
 	</ItemGroup>
 

@@ -1,4 +1,7 @@
-﻿using DoctorAppointment.Domain.Enums;
+﻿using DoctorAppointment.Data.Interfaces;
+using DoctorAppointment.Data.Repositories;
+using DoctorAppointment.Data.Serializers;
+using DoctorAppointment.Domain.Enums;
 using DoctorAppointment.Service.Services;
 using MyDoctorAppointment.Data.Repositories;
 using MyDoctorAppointment.Domain.Entities;
@@ -9,6 +12,8 @@ using System.Net.WebSockets;
 using System.Numerics;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using DataGenerator;
+using DoctorAppointment.Service.Interfaces;
 
 namespace MyDoctorAppointment
 {
@@ -16,23 +21,57 @@ namespace MyDoctorAppointment
     {
         public static void Main()
         {
-            var doctorAppointment = new DoctorAppointment();
+            FileExtension chosenExtension = DoctorAppointment.ChooseFileFormat();
+
+            ISerializer serializer = chosenExtension switch
+            {
+                FileExtension.Xml => new SerializerXml(),
+                FileExtension.Json => new SerializerJson(),
+                _ => throw new NotImplementedException(),
+            };
+            var doctorAppointment = new DoctorAppointment(serializer, chosenExtension);
             doctorAppointment.Menu();
         }
     }
     public class DoctorAppointment
     {
-        private readonly IService<Doctor> doctorService;
-        private readonly IService<Patient> patientService;
-        private readonly IService<Appointment> appointmentService;
+        private readonly IDoctorService _doctorService;
+        private readonly IPatientService _patientService;
+        private readonly IAppointmentService _appointmentService;
 
-        public DoctorAppointment()
+        public DoctorAppointment(ISerializer serializer, FileExtension extension)
         {
-            doctorService = new DoctorService();
-            patientService = new PatientService();
-            appointmentService = new AppointmentService();
+            _doctorService = new DoctorService(serializer, extension);
+            _patientService = new PatientService(serializer, extension);
+            _appointmentService = new AppointmentService(serializer, extension);
         }
-
+        public static FileExtension ChooseFileFormat()
+        {
+            while (true)
+            {
+                Console.WriteLine("===========================================");
+                Console.WriteLine("         Preferred data format");
+                Console.WriteLine("===========================================");
+                Console.WriteLine("1. JSON");
+                Console.WriteLine("2. XML");
+                Console.WriteLine("3. Exit");
+                Console.Write("Choode option: ");
+                string? input = Console.ReadLine();
+                if (int.TryParse(input, out int inputChoice) && inputChoice >= 1 && inputChoice <= 3)
+                {
+                    switch (inputChoice)
+                    {
+                        case 1: return FileExtension.Json;
+                        case 2: return FileExtension.Xml;
+                        case 3: Environment.Exit(0); break;
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Incorrect input");
+                }
+            }
+        }
         public void Menu()
         {
             bool switcher = true;
@@ -74,72 +113,88 @@ namespace MyDoctorAppointment
 
             }
         }
+        private readonly Random rnd = new();
         private void AddDoctor()
         {
             var doctor = new Doctor
             {
-                Id = 1,
-                Name = "Antuan",
-                Surname = "Conde",
-                Experience = 7,
-                DoctorType = DoctorTypes.FamilyDoctor,
-                Salary = 7560,
+                Name = Generator.GetFirstName(),
+                Surname = Generator.GetLastName(),
+                Experience = (byte)rnd.Next(1, 25),
+                DoctorType = (DoctorTypes)rnd.Next(1, 4),
+                Salary = rnd.Next(2500, 10500),
                 Phone = "+173644001",
                 Email = "acd@gmail.com"
             };
-            doctorService.Create(doctor);
+            _doctorService.Create(doctor);
             Console.WriteLine($"Added doctor {doctor.Name} {doctor.Surname}");
         }
         private void AddPatient()
         {
             var patient = new Patient
             {
-                Id = 1,
-                Name = "Elizabeth",
-                Surname = "Harrison",
+                Name = Generator.GetFirstName(),
+                Surname = Generator.GetLastName(),
                 Phone = "+44 7700 900351",
-                Email = "elizabeth.harrison@example.com",
-                IllnessType = IllnessTypes.EyeDisease,
-                AdditionalInfo = "Requires assistance climbing stairs. History of severe migraines.",
+                Email = "abcd@example.com",
+                IllnessType = (IllnessTypes)rnd.Next(1, 5),
+                AdditionalInfo = "Some important additional info",
                 Address = "24 Richmond Road, London, SW15 1JH, UK",
                 CreatedAt = DateTime.Now,
             };
-            patientService.Create(patient);
+            _patientService.Create(patient);
             Console.WriteLine($"Added patient {patient.Name} {patient.Surname}");
         }
         private void AddAppointment()
         {
+            var allDoctors = _doctorService.GetAll().ToList();
+            var allPatients = _patientService.GetAll().ToList();
+            if (allDoctors.Count == 0 || allPatients.Count == 0)
+            {
+                Console.WriteLine("There are no records in the database");
+                return;
+            }
+            var doctor = allDoctors[rnd.Next(allDoctors.Count)];
+            var patient = allPatients[rnd.Next(allPatients.Count)];
+
             var appointment = new Appointment
             {
-                Id = 42,
-                Patient = new Patient { Name = "Karl", Surname = "Bexler" },
-                Doctor = new Doctor { Name = "Henry", Surname = "Korven" },
+                PatientId = patient.Id,
+                DoctorId = doctor.Id,
                 DateTimeFrom = new DateTime(2026, 01, 15, 14, 00, 00),
                 DateTimeTo = new DateTime(2026, 01, 15, 14, 45, 00),
-                Description = "Routine check-up and follow-up consultation regarding migraines.",
+                Description = "Some interesting description :)",
                 CreatedAt = DateTime.Now,
             };
-            appointmentService.Create(appointment);
-            Console.WriteLine($"Added new appointment for {appointment.Patient.Name} {appointment.Patient.Surname}\n" +
-                $"doctor: {appointment.Doctor.Name} {appointment.Doctor.Surname}");
+            _appointmentService.Create(appointment);
+
+            Console.WriteLine(
+                $"Added new appointment for {patient.Name} {patient.Surname}\n" +
+                $"doctor: {doctor.Name} {doctor.Surname}");
         }
         private void Showdoctors()
         {
-            var allDoctors = doctorService.GetAll();
+            var allDoctors = _doctorService.GetAll();
             foreach (var doctor in allDoctors)
-                doctorService.ShowInfo(doctor);
+                _doctorService.ShowInfo(doctor);
         }
         private void ShowPatients()
         {
-            var allPatients = patientService.GetAll();
+            var allPatients = _patientService.GetAll();
             foreach (var patient in allPatients)
-                patientService.ShowInfo(patient);
+                _patientService.ShowInfo(patient);
         }
-        private void ShowAppointments()
+        public void ShowAppointments()
         {
-            var allAppointments = appointmentService.GetAll();
+            var doctors = _doctorService.GetAll();
+            var patients = _patientService.GetAll();
+            var allAppointments = _appointmentService.GetAll();
             foreach (var appointment in allAppointments)
-                appointmentService.ShowInfo(appointment);
+            {
+                var doctor = doctors.FirstOrDefault(x => x.Id == appointment.DoctorId)!;
+                var patient = patients.FirstOrDefault(x => x.Id == appointment.PatientId)!;
+                _appointmentService.ShowInfo(appointment, doctor, patient);
+            }
         }
     }
 }

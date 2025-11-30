@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-16"?>
+<LastIdData xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <DoctorsLastId>0</DoctorsLastId>
+  <PatientsLastId>0</PatientsLastId>
+  <AppointmentsLastId>0</AppointmentsLastId>
+</LastIdData>

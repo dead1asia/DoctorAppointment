@@ -13,6 +13,5 @@ namespace MyDoctorAppointment.Service.Interfaces
         bool Delete(int id);
 
         TSource Update(int id, TSource entity);
-        void ShowInfo(TSource entity);
     }
 }

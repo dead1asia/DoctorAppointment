@@ -1,6 +1,6 @@
 ﻿using DoctorAppointment.Data.Configuration;
 using DoctorAppointment.Data.Interfaces;
-using MyDoctorAppointment.Data.Configuration;
+using DoctorAppointment.Domain.Enums;
 using MyDoctorAppointment.Data.Repositories;
 using MyDoctorAppointment.Domain.Entities;
 using Newtonsoft.Json;
@@ -16,14 +16,18 @@ namespace DoctorAppointment.Data.Repositories
     {
         public override string Path { get; set; }
         public override int LastId { get; set; }
-        public AppointmentRepository()
+        private readonly FileExtension _extension;
+        public AppointmentRepository(ISerializer serializer, FileExtension extension)
+            : base(serializer)
         {
-            AppSettings settings = ReadFromAppSettings();
-            Path = settings.DataBase.Appointments.Path;
-            LastId = settings.DataBase.Appointments.LastId;
+            Path = Constants.GetPath(SaveLocation.Appointments, extension);
+            LastId = LastIdManager.Load(extension).AppointmentsLastId;
+            _extension = extension;
         }
-        public override void ShowInfo(Appointment appointment)
+
+        public void ShowInfo(Appointment appointment, Doctor doctor, Patient patient)
         {
+            
             var sb = new StringBuilder();
 
             sb.AppendLine("===========================================");
@@ -31,20 +35,20 @@ namespace DoctorAppointment.Data.Repositories
             sb.AppendLine("===========================================");
             sb.AppendLine($"Start Time:     {appointment.DateTimeFrom:dd.MM.yyyy HH:mm}");
             sb.AppendLine($"End Time:       {appointment.DateTimeTo:dd.MM.yyyy HH:mm}");
-            sb.AppendLine($"Doctor:         {appointment.Doctor?.Name} {appointment.Doctor?.Surname ?? "Not assigned"}");
-            sb.AppendLine($"Patient:        {appointment.Patient?.Name} {appointment.Patient?.Surname ?? "Not assigned"}");
+            sb.AppendLine($"Doctor:         {doctor.Name} {doctor.Surname}");
+            sb.AppendLine($"Patient:        {patient.Name} {patient.Surname}");
             sb.AppendLine($"Description:    {appointment.Description ?? "No description"}");
             sb.AppendLine("--- System Data ---");
             sb.AppendLine($"Created:        {appointment.CreatedAt:dd.MM.yyyy HH:mm:ss}");
             sb.AppendLine("===========================================");
             Console.WriteLine(sb);
         }
+        public override void ShowInfo(Appointment source) { }
         protected override void SaveLastId()
         {
-            AppSettings settings = ReadFromAppSettings();
-            settings.DataBase.Patients.LastId = LastId;
-            string updatedSettings = JsonConvert.SerializeObject(settings, Formatting.Indented);
-            File.WriteAllText(Constants.AppSettingsPath, updatedSettings);
+            LastIdData data = LastIdManager.Load(_extension);
+            data.AppointmentsLastId = LastId;
+            LastIdManager.Save(data, _extension);
         }
     }
 }
